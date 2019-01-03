@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+		xmlns:android="http://schemas.android.com/apk/res/android"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_marginTop="10dp"
+		xmlns:app="http://schemas.android.com/apk/res-auto"
+		xmlns:tools="http://schemas.android.com/tools"
+		android:background="@color/colorWhite">
+	
+	<View
+			android:id="@+id/vtopCicle"
+			android:layout_width="10dp"
+			android:layout_height="10dp"
+			android:background="@drawable/solid_background_circle"
+			app:layout_constraintStart_toStartOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			android:layout_marginTop="15dp"
+			android:layout_marginStart="16dp"
+			/>
+	
+	<TextView
+			android:id="@+id/tvStartTime"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			app:layout_constraintStart_toEndOf="@id/vtopCicle"
+			tools:text="9:28 PM"
+			android:textColor="@color/grey"
+			app:layout_constraintTop_toTopOf="parent"
+			android:layout_marginTop="10dp"
+			android:layout_marginStart="8dp"
+			android:fontFamily="@font/font_for_app"/>
+	
+	<TextView
+			android:id="@+id/tvBusCompany"
+			android:layout_width="0dp"
+			android:layout_height="wrap_content"
+			android:textSize="14sp"
+			app:layout_constraintStart_toEndOf="@id/vtopCicle"
+			app:layout_constraintTop_toBottomOf="@+id/tvStartTime"
+			android:layout_marginTop="5dp"
+			android:layout_marginStart="8dp"
+			android:textColor="#000"
+			tools:text="ABCD PVT LTD"
+			android:fontFamily="@font/font_for_app"
+			/>
+	
+	<TextView
+			android:id="@+id/tvBusName"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintStart_toEndOf="@id/vtopCicle"
+			app:layout_constraintTop_toBottomOf="@+id/tvBusCompany"
+			android:fontFamily="@font/font_for_app"
+			tools:text="Volvo"
+			android:layout_marginTop="5dp"
+			android:layout_marginStart="8dp"
+			/>
+	
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintTop_toBottomOf="@+id/tvBusName"
+			app:layout_constraintStart_toEndOf="@id/vtopCicle"
+			android:layout_marginTop="10dp"
+			android:layout_marginStart="8dp"
+			tools:text="12:30 AM"
+			android:fontFamily="@font/font_for_app"
+			android:id="@+id/tvEndTime"/>
+	
+	<View
+			android:layout_width="10dp"
+			android:layout_height="10dp"
+			android:id="@+id/vBottomView"
+			android:layout_marginTop="8dp"
+			app:layout_constraintTop_toTopOf="@+id/tvEndTime"
+			app:layout_constraintStart_toStartOf="parent"
+			android:layout_marginStart="16dp"
+			android:layout_marginBottom="8dp"
+			android:background="@drawable/circle_background_with_border"
+			app:layout_constraintBottom_toBottomOf="@+id/tvEndTime"/>
+	
+	<include
+		app:layout_constraintTop_toBottomOf="@+id/vtopCicle"
+		app:layout_constraintBottom_toTopOf="@+id/vBottomView"
+		layout="@layout/vertical_line"
+		android:layout_width="1dp"
+		android:layout_height="0dp"
+		android:layout_marginTop="2dp"
+		android:layout_marginBottom="2dp"
+		app:layout_constraintStart_toStartOf="@id/vtopCicle"
+		app:layout_constraintEnd_toEndOf="@id/vBottomView"
+		/>
+	
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/tvRating"
+			android:background="@drawable/rectangle_rating"
+			tools:text="4.3"
+			android:fontFamily="@font/font_for_app"
+			android:textColor="@color/colorWhite"
+			android:paddingTop="3dp"
+			android:paddingStart="8dp"
+			android:paddingEnd="8dp"
+			android:paddingBottom="3dp"
+			android:textSize="12sp"
+			android:textStyle="bold"
+			android:layout_marginTop="16dp"
+			app:layout_constraintTop_toBottomOf="@+id/tvEndTime"
+			app:layout_constraintStart_toStartOf="@id/vBottomView"
+			android:layout_marginBottom="8dp"
+			app:layout_constraintBottom_toBottomOf="parent"/>
+	
+	<TextView
+			android:id="@+id/tvNoRating"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintStart_toEndOf="@id/tvRating"
+			android:layout_marginStart="8dp"
+			app:layout_constraintTop_toTopOf="@+id/tvRating"
+			app:layout_constraintBottom_toBottomOf="@+id/tvRating"
+			tools:text="1200 ratings"
+			android:textSize="11sp"
+			android:fontFamily="@font/font_for_app"
+			/>
+	
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintEnd_toEndOf="parent"
+			app:layout_constraintTop_toTopOf="parent"
+			android:id="@+id/tvArrivalTime"
+			android:layout_marginEnd="16dp"
+			android:layout_marginTop="10dp"
+			tools:text="5 mins"
+			android:textSize="16sp"
+			android:textColor="#000"
+			android:fontFamily="@font/font_for_app"
+			android:textStyle="bold"/>
+	
+	<TextView
+			android:id="@+id/tvTotalAmt"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			app:layout_constraintBottom_toBottomOf="parent"
+			app:layout_constraintEnd_toEndOf="parent"
+			android:layout_marginEnd="16dp"
+			tools:text="Rs.449"
+			android:fontFamily="@font/font_for_app"
+			android:textColor="#000"
+			android:textSize="12sp"
+			android:textStyle="bold"
+			android:layout_marginBottom="8dp"
+			/>
+	
+	<include
+	    android:id="@+id/vVerticalLine"
+		layout="@layout/vertical_line"
+		android:layout_width="1dp"
+		android:layout_height="0dp"
+		app:layout_constraintTop_toTopOf="@+id/tvTotalAmt"
+		app:layout_constraintBottom_toBottomOf="@+id/tvTotalAmt"
+		app:layout_constraintEnd_toStartOf="@id/tvTotalAmt"
+		android:layout_marginEnd="5dp"
+		/>
+	
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/tvSeatsLeft"
+			tools:text="16 seats left"
+			android:textSize="12sp"
+			android:layout_marginEnd="5dp"
+			android:fontFamily="@font/font_for_app"
+			android:textColor="@color/deep_grey"
+			app:layout_constraintEnd_toStartOf="@id/vVerticalLine"
+			app:layout_constraintTop_toTopOf="@+id/tvTotalAmt"
+			app:layout_constraintBottom_toBottomOf="@+id/tvTotalAmt"/>
+	
+	<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:id="@+id/tvRedBusDeal"
+			android:gravity="center"
+			android:drawableStart="@mipmap/dog_tag"
+			android:drawablePadding="8dp"
+			app:layout_constraintBottom_toTopOf="@+id/tvTotalAmt"
+			app:layout_constraintEnd_toEndOf="parent"
+			tools:text="Red Bus Deal"
+			android:textSize="12sp"
+			android:layout_marginBottom="8dp"
+			android:layout_marginEnd="16dp"
+			android:fontFamily="@font/font_for_app"/>
+
+	<!--<TextView
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="@+id/tvRedBusDeal"
+			app:layout_constraintBottom_toBottomOf="@+id/tvRedBusDeal"
+			app:layout_constraintEnd_toStartOf="@id/tvRedBusDeal"
+			android:drawableStart="@mipmap/dog_tag"
+			android:text="Red Deal"
+			android:drawablePadding="8dp"
+			android:fontFamily="@font/font_for_app"
+			android:textSize="12sp"
+			android:id="@+id/tvRedDealLabel"
+			android:layout_marginEnd="2dp"
+	/>-->
+
+</androidx.constraintlayout.widget.ConstraintLayout>
