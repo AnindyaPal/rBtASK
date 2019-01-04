@@ -6,13 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-    </style>
-
-    <style name="AppTheme.SplashScreen">
-        <item name="windowNoTitle">true</item>
-        <item name="windowActionBar">false</item>
-        <item name="android:windowContentOverlay">@null</item>
-        <item name="android:windowDisablePreview">true</item>
+        <item name="android:fontFamily">@font/font_for_app</item>
     </style>
 
 </resources>

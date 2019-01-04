@@ -8,4 +8,5 @@ class Inventory {
     var nosRating: Int ? = null
     var seats: Seats ?= null
     var bus: Bus ?= null
+    var maxSize : Int ? = null
 }

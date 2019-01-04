@@ -1,10 +1,14 @@
 package com.example.shantunu.redbusassgn.ui.activities
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
+import android.view.animation.DecelerateInterpolator
+import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
@@ -15,18 +19,23 @@ import butterknife.ButterKnife
 import com.example.shantunu.redbusassgn.R
 import com.example.shantunu.redbusassgn.Utils
 import com.example.shantunu.redbusassgn.apiModels.Inventory
-import com.example.shantunu.redbusassgn.viewModel.GetAllResultsViewModel
 import com.example.shantunu.redbusassgn.ui.adapter.RvDurationAdapter
 import com.example.shantunu.redbusassgn.ui.adapter.RvFareFilterAdapter
 import com.example.shantunu.redbusassgn.ui.adapter.RvSearchResultsAdapter
+import com.example.shantunu.redbusassgn.viewModel.GetAllResultsViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import kotlinx.android.synthetic.main.activity_search_results_actv.*
 import kotlinx.android.synthetic.main.bottom_sheet_filter.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
-import android.widget.ProgressBar
-import android.view.animation.DecelerateInterpolator
-import android.animation.ObjectAnimator
+import androidx.recyclerview.widget.RecyclerView
+import it.sephiroth.android.library.xtooltip.Tooltip
+import com.example.shantunu.redbusassgn.R.id.textView
+import android.R.attr.fadeDuration
+
+
+
+
 
 class SearchResultsActv : AppCompatActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
@@ -36,6 +45,7 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
 
     val searchResults : MutableList<Inventory> = mutableListOf()
     val searchResultsCopy : MutableList<Inventory> = mutableListOf()
+    var listForPagination : MutableList<Inventory> = mutableListOf()
 
     val types : LinkedHashMap<String, String> = LinkedHashMap()
     val travels : LinkedHashMap<String, String> = LinkedHashMap()
@@ -68,14 +78,20 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
             fullModel ?.let {
                 hideProgressBar()
                 searchResults.clear()
-                searchResults.addAll(fullModel.inventory)
+
                 searchResultsCopy.clear()
                 searchResultsCopy.addAll(fullModel.inventory)
+
+                listForPagination.clear()
+                listForPagination.addAll(fullModel.inventory)
+                paginate()
+
                 types.clear()
                 types.putAll(fullModel.busType)
                 travels.clear()
                 travels.putAll(fullModel.travels)
                 rvDataAdapter?.notifyDataSetChanged()
+                paginateRecyclerView()
             } ?: kotlin.run {
                 hideProgressBar()
                 showConnectivityDialog()
@@ -84,14 +100,39 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
         getDataViewModel?.getAllResults()
     }
 
+    private fun paginateRecyclerView() {
+        rvData.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (!recyclerView.canScrollVertically(1)) {
+                    paginate()
+                }
+            }
+        })
+    }
+
+    private fun paginate() {
+        var counter = 0
+        for (i in searchResults.size until listForPagination.size) {
+            if (counter <=9 ){
+                searchResults.add(listForPagination[i])
+                counter += 1
+            }
+            else {
+                break
+            }
+        }
+        searchResults[searchResults.size - 1].maxSize = listForPagination.size - 1
+        Handler().postDelayed(Runnable {  rvDataAdapter?.notifyDataSetChanged() }, 1000)
+    }
+
     private fun hideProgressBar() {
-        progressBar.visibility = View.GONE
+        Handler().postDelayed(Runnable { progressBar.visibility = View.GONE }, 500)
     }
 
     private fun showProgressBar() {
         progressBar.visibility = View.VISIBLE
         setProgressMax(progressBar, 1000)
-        setProgressAnimate(progressBar, 100)
+        setProgressAnimate(progressBar, 10)
     }
 
     private fun setProgressMax(pb: ProgressBar, max: Int) {
@@ -100,7 +141,7 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
 
     private fun setProgressAnimate(pb: ProgressBar, progressTo: Int) {
         val animation = ObjectAnimator.ofInt(pb, "progress", pb.progress, progressTo * 100)
-        animation.duration = 100
+        animation.duration = 500
         animation.interpolator = DecelerateInterpolator()
         animation.start()
     }
@@ -118,7 +159,21 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item?.itemId){
             R.id.filter -> {
+                val view = findViewById<View>(R.id.filter)
                 initBottomSheetFilter()
+                val tooltip = Tooltip.Builder(this@SearchResultsActv)
+                    .anchor(view, 0, 0, true)
+                    .text("Tap to apply filter")
+                    .arrow(true)
+                    .floatingAnimation(Tooltip.Animation.DEFAULT)
+                    .showDuration(2000)
+                    .fadeDuration(300)
+                    .overlay(true)
+                    .create()
+
+                tooltip
+                    .doOnFailure {  }
+                    .show(view, Tooltip.Gravity.BOTTOM, true)
             }
             android.R.id.home -> {
                 onBackPressed()
@@ -163,8 +218,18 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
 
     suspend fun performFilter(){
         searchResults.clear()
-        withContext(Dispatchers.Default) {searchResults.addAll(Utils.getFullFilteredInventory(farePosition, durationPosition, searchResultsCopy))}
-        rvDataAdapter?.notifyDataSetChanged()
+        withContext(Dispatchers.Default) { listForPagination = Utils.getFullFilteredInventory(farePosition, durationPosition, searchResultsCopy) }
+        paginate()
         hideProgressBar()
+    }
+
+    override fun onBackPressed() {
+        val filterSheetBehavior = BottomSheetBehavior.from(bottomDialogFilter)
+        if (filterSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED){
+            filterSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+        else{
+            super.onBackPressed()
+        }
     }
 }
