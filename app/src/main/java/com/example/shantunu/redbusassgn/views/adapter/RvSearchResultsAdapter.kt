@@ -1,7 +1,9 @@
 package com.example.shantunu.redbusassgn.views.adapter
 
 import android.content.Context
-import android.graphics.Paint
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StrikethroughSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -9,20 +11,18 @@ import com.example.shantunu.redbusassgn.R
 import com.example.shantunu.redbusassgn.Utils
 import com.example.shantunu.redbusassgn.apiModels.Inventory
 import com.example.shantunu.redbusassgn.views.viewHolders.EachBusHolder
-import android.text.Spanned
-import android.text.style.StrikethroughSpan
-import android.text.Spannable
-import android.text.SpannableString
 
 
 class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Context,
-                              val types : LinkedHashMap<String, String>, val travels : LinkedHashMap<String, String>)
+                              private val types : LinkedHashMap<String, String>, private val travels : LinkedHashMap<String, String>)
     : RecyclerView.Adapter<EachBusHolder>() {
+
     override fun getItemCount(): Int {
         return data.size
     }
 
     override fun onBindViewHolder(holder: EachBusHolder, position: Int) {
+
         holder.tvStartTime.text = data[position].startTime?.let { Utils.getTime(it) }
         holder.tvBusType.text = types[data[position].bus?.type?.toString()]
         holder.tvBusCompany.text = travels[data[position].bus?.travelsName?.toString()]
