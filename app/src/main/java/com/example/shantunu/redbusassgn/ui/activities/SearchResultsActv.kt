@@ -1,21 +1,19 @@
 package com.example.shantunu.redbusassgn.ui.activities
 
-import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.view.animation.DecelerateInterpolator
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import butterknife.ButterKnife
+import androidx.recyclerview.widget.RecyclerView
 import com.example.shantunu.redbusassgn.R
 import com.example.shantunu.redbusassgn.Utils
 import com.example.shantunu.redbusassgn.apiModels.Inventory
@@ -24,20 +22,13 @@ import com.example.shantunu.redbusassgn.ui.adapter.RvFareFilterAdapter
 import com.example.shantunu.redbusassgn.ui.adapter.RvSearchResultsAdapter
 import com.example.shantunu.redbusassgn.viewModel.GetAllResultsViewModel
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import it.sephiroth.android.library.xtooltip.Tooltip
 import kotlinx.android.synthetic.main.activity_search_results_actv.*
 import kotlinx.android.synthetic.main.bottom_sheet_filter.*
 import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
-import androidx.recyclerview.widget.RecyclerView
-import it.sephiroth.android.library.xtooltip.Tooltip
-import com.example.shantunu.redbusassgn.R.id.textView
-import android.R.attr.fadeDuration
 
-
-
-
-
-class SearchResultsActv : AppCompatActivity(), CoroutineScope {
+class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
@@ -59,7 +50,6 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search_results_actv)
-        ButterKnife.bind(this)
         initMembers()
     }
 
@@ -84,7 +74,7 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
 
                 listForPagination.clear()
                 listForPagination.addAll(fullModel.inventory)
-                paginate()
+                paginateAndNotifyAdapter()
 
                 types.clear()
                 types.putAll(fullModel.busType)
@@ -104,13 +94,13 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
         rvData.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 if (!recyclerView.canScrollVertically(1)) {
-                    paginate()
+                    paginateAndNotifyAdapter()
                 }
             }
         })
     }
 
-    private fun paginate() {
+    private fun paginateAndNotifyAdapter() {
         var counter = 0
         for (i in searchResults.size until listForPagination.size) {
             if (counter <=9 ){
@@ -121,8 +111,13 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
                 break
             }
         }
-        searchResults[searchResults.size - 1].maxSize = listForPagination.size - 1
-        Handler().postDelayed(Runnable {  rvDataAdapter?.notifyDataSetChanged() }, 1000)
+        if (searchResults.size == 0) {
+            Handler().postDelayed(Runnable {  vEmptyView.visibility = View.VISIBLE }, 500)
+        } else {
+            vEmptyView.visibility = View.GONE
+            searchResults[searchResults.size - 1].maxSize = listForPagination.size - 1
+        }
+        Handler().postDelayed(Runnable {  rvDataAdapter?.notifyDataSetChanged() }, 500)
     }
 
     private fun hideProgressBar() {
@@ -131,19 +126,6 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
 
     private fun showProgressBar() {
         progressBar.visibility = View.VISIBLE
-        setProgressMax(progressBar, 1000)
-        setProgressAnimate(progressBar, 10)
-    }
-
-    private fun setProgressMax(pb: ProgressBar, max: Int) {
-        pb.max = max * 100
-    }
-
-    private fun setProgressAnimate(pb: ProgressBar, progressTo: Int) {
-        val animation = ObjectAnimator.ofInt(pb, "progress", pb.progress, progressTo * 100)
-        animation.duration = 500
-        animation.interpolator = DecelerateInterpolator()
-        animation.start()
     }
 
     private fun showConnectivityDialog() {
@@ -219,7 +201,7 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope {
     suspend fun performFilter(){
         searchResults.clear()
         withContext(Dispatchers.Default) { listForPagination = Utils.getFullFilteredInventory(farePosition, durationPosition, searchResultsCopy) }
-        paginate()
+        paginateAndNotifyAdapter()
         hideProgressBar()
     }
 

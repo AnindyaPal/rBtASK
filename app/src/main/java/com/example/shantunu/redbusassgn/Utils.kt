@@ -15,12 +15,12 @@ class Utils {
         }
 
         fun getReachesLocationIn(minutes: Long): String {
-            val hours = minutes / 60
-            val mins = minutes % 60
+            val mins = minutes / 60
+            val secs = minutes % 60
             if (minutes >= 60) {
-                return hours.toString() + " mins " + mins + " secs"
+                return mins.toString() + " mins " + secs + " secs"
             } else {
-                return mins.toString() + " seconds"
+                return secs.toString() + " seconds"
             }
         }
 

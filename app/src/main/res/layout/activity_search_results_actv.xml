@@ -9,18 +9,27 @@
 	<androidx.constraintlayout.widget.ConstraintLayout
 			android:layout_width="match_parent"
 			android:layout_height="match_parent">
-
-		<ProgressBar
-				android:layout_width="0dp"
-				android:layout_height="wrap_content"
-				android:id="@+id/progressBar"
-				android:progress="20"
-				android:indeterminate="false"
-				app:layout_constraintStart_toStartOf="parent"
-				app:layout_constraintEnd_toEndOf="parent"
-				style="?android:attr/progressBarStyleHorizontal"
-				app:layout_constraintTop_toTopOf="parent"
-		/>
+        <fr.castorflex.android.smoothprogressbar.SmoothProgressBar
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/progressBar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                app:spb_sections_count="4"
+                app:spb_color="#000"
+                app:spb_speed="2.0"
+                app:spb_stroke_width="4dp"
+                app:spb_stroke_separator_length="4dp"
+                app:spb_reversed="false"
+                app:spb_mirror_mode="false"
+                app:spb_progressiveStart_activated="true"
+                app:spb_progressiveStart_speed="1.5"
+                app:spb_progressiveStop_speed="3.4"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+        />
 
 		<include
 			layout="@layout/destination_layout"
@@ -43,6 +52,19 @@
 				app:layout_constraintBottom_toBottomOf="parent"
 				tools:listitem="@layout/item_search_results"
 				tools:itemCount="12"/>
+
+		<include
+				android:id="@+id/vEmptyView"
+				android:visibility="gone"
+				layout="@layout/empty_layout"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				app:layout_constraintTop_toTopOf="parent"
+				app:layout_constraintBottom_toBottomOf="parent"
+				app:layout_constraintStart_toStartOf="parent"
+				app:layout_constraintEnd_toEndOf="parent"
+				/>
+
 	</androidx.constraintlayout.widget.ConstraintLayout>
 	<View
 			android:visibility="gone"
@@ -54,4 +76,5 @@
 			android:focusable="true"/>
 	<include
 			layout="@layout/bottom_sheet_filter" />
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
