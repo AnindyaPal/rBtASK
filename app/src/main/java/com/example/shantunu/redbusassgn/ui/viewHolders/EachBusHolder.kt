@@ -1,4 +1,4 @@
-package com.example.shantunu.redbusassgn.views.viewHolders
+package com.example.shantunu.redbusassgn.ui.viewHolders
 
 import android.view.View
 import android.widget.TextView

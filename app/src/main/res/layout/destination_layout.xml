@@ -15,7 +15,7 @@
             android:layout_margin="8dp"
             android:id="@+id/imageView"/>
     <TextView
-            android:text="Wakkad To Adheri"
+            android:text="Wakkad To Andheri"
             android:layout_width="0dp"
             android:layout_height="21dp"
             android:id="@+id/textView2"

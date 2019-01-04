@@ -1,4 +1,4 @@
-package com.example.shantunu.redbusassgn.views.adapter
+package com.example.shantunu.redbusassgn.ui.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.shantunu.redbusassgn.R
 import com.example.shantunu.redbusassgn.apiModels.EachRange
-import com.example.shantunu.redbusassgn.views.viewHolders.FilterHolder
+import com.example.shantunu.redbusassgn.ui.viewHolders.FilterHolder
 
 class RvFareFilterAdapter(val fareRange : MutableList<EachRange> ,
                           val setRangePostion :(positon : Int)-> Unit ): RecyclerView.Adapter<FilterHolder>() {

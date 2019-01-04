@@ -1,4 +1,4 @@
-package com.example.shantunu.redbusassgn.views.adapter
+package com.example.shantunu.redbusassgn.ui.adapter
 
 import android.content.Context
 import android.text.SpannableString
@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.shantunu.redbusassgn.R
 import com.example.shantunu.redbusassgn.Utils
 import com.example.shantunu.redbusassgn.apiModels.Inventory
-import com.example.shantunu.redbusassgn.views.viewHolders.EachBusHolder
+import com.example.shantunu.redbusassgn.ui.viewHolders.EachBusHolder
 
 
 class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Context,
