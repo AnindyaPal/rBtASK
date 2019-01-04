@@ -167,27 +167,35 @@ class Utils {
                         inventory.add(inv)
                     }
                     1->{
-                        inv.duration?.let { if (it in 0..300) {
-                            inventory.add(inv)
-                        } } ?.run {
-                            if (filteredByFare.contains(inv))
-                                filteredByFare.remove(inv)
-                        }
-                    }
+                        inv.duration?.let {
+                            if (it in 0..300) {
+                                if (!filteredByFare.contains(inv))
+                                    inventory.add(inv)
+                            } else {
+                                if (filteredByFare.contains(inv))
+                                    filteredByFare.remove(inv)
+                            }
+                        }}
                     2->{
-                        inv.duration?.let { if (it in 300..600) {
-                            inventory.add(inv)
-                        } }?.run {
-                            if (filteredByFare.contains(inv))
-                                filteredByFare.remove(inv)
+                        inv.duration?.let {
+                            if (it in 300..600) {
+                                if (!filteredByFare.contains(inv))
+                                    inventory.add(inv)
+                            } else {
+                                if (filteredByFare.contains(inv))
+                                    filteredByFare.remove(inv)
+                            }
                         }
                     }
                     3->{
-                        inv.duration?.let { if (it in 600..900) {
-                            inventory.add(inv)
-                        } }?.run {
-                            if (filteredByFare.contains(inv))
-                                filteredByFare.remove(inv)
+                        inv.duration?.let {
+                            if (it in 600..900) {
+                                if (!filteredByFare.contains(inv))
+                                    inventory.add(inv)
+                            } else {
+                                if (filteredByFare.contains(inv))
+                                    filteredByFare.remove(inv)
+                            }
                         }
                     }
                 }
