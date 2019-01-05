@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp"
+        android:background="@color/colorWhite">
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLayout1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_margin="16dp"
+            android:hint="@string/startFare"
+            app:layout_constraintEnd_toStartOf="@id/inputLayout2" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toTopOf="parent">
+        <EditText
+                android:id="@+id/etStartFareRange"
+                android:layout_width="match_parent"
+                android:inputType="number"
+                android:maxLength="4"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLayout2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="@string/endFare"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/inputLayout1" android:layout_marginTop="8dp"
+            app:layout_constraintTop_toTopOf="parent">
+        <EditText
+                android:id="@+id/etEndFareRange"
+                android:layout_width="match_parent"
+                android:inputType="number"
+                android:maxLength="4"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLayout3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:hint="@string/startHours"
+            app:layout_constraintTop_toBottomOf="@+id/inputLayout1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/inputLayout4"
+            android:layout_marginStart="8dp">
+        <EditText
+                android:id="@+id/etStartDurationRange"
+                android:layout_width="match_parent"
+                android:inputType="number"
+                android:maxLength="2"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/inputLayout4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:hint="@string/endHours"
+            app:layout_constraintTop_toBottomOf="@+id/inputLayout2"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"
+            app:layout_constraintStart_toEndOf="@+id/inputLayout3"
+            android:layout_margin="16dp"
+            android:layout_marginStart="8dp">
+        <EditText
+                android:id="@+id/etEndDurationRange"
+                android:layout_width="match_parent"
+                android:fontFamily="@font/font_for_app"
+                android:inputType="number"
+                android:maxLength="2"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small"
+                android:layout_height="wrap_content"/>
+    </com.google.android.material.textfield.TextInputLayout>
+    <Button
+            android:background="@color/colorPrimary"
+            android:text="Apply"
+            android:fontFamily="@font/font_for_app"
+            android:textColor="@color/colorWhite"
+            android:textStyle="bold"
+            android:layout_width="0dp"
+            android:layout_margin="16dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/btnSubmit"
+            app:layout_constraintTop_toBottomOf="@+id/inputLayout3"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginStart="8dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

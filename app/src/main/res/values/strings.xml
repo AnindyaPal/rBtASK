@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">RedBusAssgn</string>
     <string name="rs">\u20B9</string>
+    <string name="hours">Hours</string>
+    <string name="startFare">Start Fare ( INR )</string>
+    <string name="endFare">End Fare ( INR )</string>
+    <string name="startHours">Start Hour</string>
+    <string name="endHours">End Hour</string>
 </resources>

@@ -1,9 +1,18 @@
 package com.example.shantunu.redbusassgn
 
+import android.app.Dialog
 import android.content.Context
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.ConnectivityManager
+import android.os.Handler
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ProgressBar
 import com.example.shantunu.redbusassgn.apiModels.EachRange
 import com.example.shantunu.redbusassgn.apiModels.Inventory
+import it.sephiroth.android.library.xtooltip.Tooltip
+import kotlinx.android.synthetic.main.activity_search_results_actv.*
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
@@ -94,121 +103,108 @@ class Utils {
             return durationRange
         }
 
-        fun getFullFilteredInventory(farePostion: Int, durationPosition: Int, searchResultsCopy: MutableList<Inventory>
-        ): MutableList<Inventory> {
-            val inventory = mutableListOf<Inventory>()
-            for (inv in searchResultsCopy) {
-                if (farePostion == 0 && durationPosition == 0){
-                    inventory.addAll(searchResultsCopy)
-                    return  inventory
+        fun performFilter(farePostion: Int, durationPosition: Int, searchResultsCopy: MutableList<Inventory>): MutableList<Inventory> {
+
+            var startFare = 0
+            var endFare = 0
+            var startDuration : Long = 0
+            var endDuration : Long = 0
+
+            when(farePostion){
+                0-> {
+                    startFare = 0
+                    endFare = 10000
                 }
-                when(farePostion){
-                    0->{
-                        inventory.add(inv)
-                    }
-                    1->{
-                        inv.seats?.baseFare?.let { if (it in 0..500) {
-                            inventory.add(inv)
-                        } }
-                    }
-                    2->{
-                        inv.duration?.let { if (it in 500..1000) {
-                            inventory.add(inv)
-                        } }
-                    }
-                    3->{
-                        inv.duration?.let { if (it in 1000..1500) {
-                            inventory.add(inv)
-                        } }
-                    }
+                1-> {
+                    startFare = 0
+                    endFare = 500
+                }
+                2 -> {
+                    startFare = 500
+                    endFare = 1000
+                }
+                3 -> {
+                    startFare = 1000
+                    endFare = 1500
                 }
             }
-            inventory.addAll(filterByDuration(durationPosition, searchResultsCopy, inventory))
-            removeExtraInvalidInventory(inventory, farePostion)
-            return inventory
+
+            when(durationPosition){
+                0 -> {
+                    startDuration = 0
+                    endDuration = 10000
+                }
+                1 -> {
+                    startDuration = 0
+                    endDuration = 300
+                }
+                2 -> {
+                    startDuration = 300
+                    endDuration = 600
+                }
+                3 -> {
+                    startDuration = 600
+                    endDuration = 900
+                }
+            }
+
+            return filterAction(startFare, endFare, startDuration, endDuration, searchResultsCopy)
         }
 
-        private fun removeExtraInvalidInventory(inventory: MutableList<Inventory>, farePostion: Int) : MutableList<Inventory> {
-            val inventoryTobeRemoved = mutableListOf<Inventory>()
-            for (inv in inventory) {
-                when(farePostion){
-                    1->{
-                        inv.seats?.baseFare?.let { if (it !in 0..500) {
-                            if (inventory.contains(inv))
-                                inventoryTobeRemoved.add(inv)
-                        } }
-                    }
-                    2->{
-                        inv.duration?.let { if (it !in 500..1000) {
-                            if (inventory.contains(inv))
-                                inventoryTobeRemoved.add(inv)
-                        } }
-                    }
-                    3->{
-                        inv.duration?.let { if (it !in 1000..1500) {
-                            if (inventory.contains(inv))
-                                inventoryTobeRemoved.add(inv)
-                        } }
-                    }
-                }
-            }
+        fun filterAction(startFare : Int, endFare : Int, startDuration : Long,
+                         endDuration : Long, searchResultsCopy : MutableList<Inventory>): MutableList<Inventory>{
 
-            for (removalObject in inventoryTobeRemoved) {
-                inventory.remove(removalObject)
+            val inventories : MutableList<Inventory> = mutableListOf()
+            for (inventory in searchResultsCopy) {
+                if (inventory.seats?.baseFare in startFare..endFare && inventory.duration in startDuration..endDuration)
+                    inventories.add(inventory)
             }
-
-            return inventory
-        }
-
-        fun filterByDuration(durationPosition: Int, searchResultsCopy: MutableList<Inventory>, filteredByFare :MutableList<Inventory>)
-                : MutableList<Inventory>{
-            val inventory = mutableListOf<Inventory>()
-            for (inv in searchResultsCopy){
-                when(durationPosition){
-                    0->{
-                        inventory.add(inv)
-                    }
-                    1->{
-                        inv.duration?.let {
-                            if (it in 0..300) {
-                                if (!filteredByFare.contains(inv))
-                                    inventory.add(inv)
-                            } else {
-                                if (filteredByFare.contains(inv))
-                                    filteredByFare.remove(inv)
-                            }
-                        }}
-                    2->{
-                        inv.duration?.let {
-                            if (it in 300..600) {
-                                if (!filteredByFare.contains(inv))
-                                    inventory.add(inv)
-                            } else {
-                                if (filteredByFare.contains(inv))
-                                    filteredByFare.remove(inv)
-                            }
-                        }
-                    }
-                    3->{
-                        inv.duration?.let {
-                            if (it in 600..900) {
-                                if (!filteredByFare.contains(inv))
-                                    inventory.add(inv)
-                            } else {
-                                if (filteredByFare.contains(inv))
-                                    filteredByFare.remove(inv)
-                            }
-                        }
-                    }
-                }
-            }
-            return inventory
+            return inventories
         }
 
         fun isNetworkAvailable(context: Context): Boolean {
             val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
             val activeNetworkInfo = connectivityManager.activeNetworkInfo
             return activeNetworkInfo != null && activeNetworkInfo.isConnected
+        }
+
+        fun getDialog(context: Context, resourceId : Int): Dialog {
+            val dialog = Dialog(context)
+            dialog.setContentView(resourceId)
+
+            if (dialog.window != null) {
+                dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.window!!.setLayout(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            return dialog
+        }
+
+        fun showProgressBar(progressBar : ProgressBar) {
+            progressBar.visibility = View.VISIBLE
+        }
+
+        fun hideProgressBar(progressBar : ProgressBar) {
+            Handler().postDelayed(kotlinx.coroutines.Runnable { progressBar.visibility = View.GONE }, 500)
+        }
+
+        fun showToolTip(view: View, message: String, gravity : Tooltip.Gravity, context : Context) {
+            val tooltip = Tooltip.Builder(context)
+                .anchor(view, 0, 0, true)
+                .text(message)
+                .arrow(true)
+                .floatingAnimation(Tooltip.Animation.DEFAULT)
+                .showDuration(2000)
+                .fadeDuration(300)
+                .overlay(true)
+                .create()
+
+            tooltip
+                .doOnFailure {  }
+                .show(view, gravity, true)
         }
     }
 }

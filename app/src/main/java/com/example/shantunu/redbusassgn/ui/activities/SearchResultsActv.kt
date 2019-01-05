@@ -1,5 +1,6 @@
 package com.example.shantunu.redbusassgn.ui.activities
 
+import android.app.Dialog
 import android.os.Bundle
 import android.os.Handler
 import android.view.Menu
@@ -8,6 +9,8 @@ import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
+import android.widget.Button
+import android.widget.EditText
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -18,6 +21,9 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.shantunu.redbusassgn.R
 import com.example.shantunu.redbusassgn.Utils
+import com.example.shantunu.redbusassgn.Utils.Companion.hideProgressBar
+import com.example.shantunu.redbusassgn.Utils.Companion.showProgressBar
+import com.example.shantunu.redbusassgn.Utils.Companion.showToolTip
 import com.example.shantunu.redbusassgn.apiModels.Inventory
 import com.example.shantunu.redbusassgn.ui.adapter.RvDurationAdapter
 import com.example.shantunu.redbusassgn.ui.adapter.RvFareFilterAdapter
@@ -65,33 +71,35 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         rvData.adapter = rvDataAdapter
         rvData.layoutManager = LinearLayoutManager(this)
 
-        showProgressBar()
+        showProgressBar(progressBar)
 
         getDataViewModel = ViewModelProviders.of(this).get(GetAllResultsViewModel::class.java)
         getDataViewModel?.liveData?.observe(this, Observer { fullModel ->
             fullModel ?.let {
-                hideProgressBar()
-                searchResults.clear()
+
+                hideProgressBar(progressBar)
 
                 searchResultsCopy.clear()
                 searchResultsCopy.addAll(fullModel.inventory)
 
                 listForPagination.clear()
                 listForPagination.addAll(fullModel.inventory)
-                paginateAndNotifyAdapter()
 
                 types.clear()
                 types.putAll(fullModel.busType)
                 travels.clear()
                 travels.putAll(fullModel.travels)
 
-                paginateRecyclerView()
+                paginateAndNotifyAdapter()
+
             } ?: kotlin.run {
-                hideProgressBar()
+                hideProgressBar(progressBar)
                 showSnackbar()
             }
         })
         getDataViewModel?.getAllResults()
+        paginateRecyclerView()
+
     }
 
     private fun paginateRecyclerView() {
@@ -120,6 +128,8 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
     }
 
     private fun paginateAndNotifyAdapter() {
+
+        searchResults.clear()
         var counter = 0
         for (i in searchResults.size until listForPagination.size) {
             if (counter <=9 ){
@@ -131,12 +141,12 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
             }
         }
         if (searchResults.size == 0) {
-            Handler().postDelayed(Runnable {  vEmptyView.visibility = View.VISIBLE }, 500)
+            vEmptyView.visibility = View.VISIBLE
         } else {
             vEmptyView.visibility = View.GONE
             searchResults[searchResults.size - 1].maxSize = listForPagination.size - 1
         }
-        Handler().postDelayed(Runnable {  rvDataAdapter?.notifyDataSetChanged() }, 500)
+        rvDataAdapter?.notifyDataSetChanged()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -150,19 +160,7 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
             R.id.filter -> {
                 val view = findViewById<View>(R.id.filter)
                 initBottomSheetFilter()
-                val tooltip = Tooltip.Builder(this@SearchResultsActv)
-                    .anchor(view, 0, 0, true)
-                    .text("Tap to apply filter")
-                    .arrow(true)
-                    .floatingAnimation(Tooltip.Animation.DEFAULT)
-                    .showDuration(2000)
-                    .fadeDuration(300)
-                    .overlay(true)
-                    .create()
-
-                tooltip
-                    .doOnFailure {  }
-                    .show(view, Tooltip.Gravity.BOTTOM, true)
+                showToolTip(view, "Tap to filter", Tooltip.Gravity.BOTTOM, this)
             }
             android.R.id.home -> {
                 onBackPressed()
@@ -177,6 +175,7 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
     }
 
     private fun initBottomSheetFilter() {
+
         val filterSheetBehavior = BottomSheetBehavior.from(bottomDialogFilter)
         rvFareFilter.adapter = RvFareFilterAdapter(Utils.getFareRange(farePosition)){ position: Int -> farePosition = position }
         rvFareFilter.layoutManager = LinearLayoutManager(this)
@@ -187,8 +186,18 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         btnApplyFilter.setOnClickListener {
             it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.button_click_shrink))
             filterSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
-            showProgressBar()
-            launch { performFilter() }
+            showProgressBar(progressBar)
+            launch { performNormalFilter() }
+        }
+
+        val dialogCustomize = Utils.getDialog(this@SearchResultsActv, R.layout.custom_filter)
+        setUpDialogCustomize(dialogCustomize)
+
+        vCustomize.setOnClickListener {
+            filterSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.button_click_shrink))
+
+            dialogCustomize.show()
         }
 
         filterSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
@@ -196,6 +205,9 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
             override fun onStateChanged(@NonNull bottomSheet: View, newState: Int) {
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     bg.visibility = View.GONE
+                } else if (newState == BottomSheetBehavior.STATE_EXPANDED){
+                    showToolTip(vCustomize, "Customize filter options", Tooltip.Gravity.LEFT,this@SearchResultsActv)
+                    vCustomize.startAnimation(AnimationUtils.loadAnimation(vCustomize.context, R.anim.rotation_anim))
                 }
             }
             override fun onSlide(@NonNull bottomSheet: View, slideOffset: Float) {
@@ -205,11 +217,52 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         })
     }
 
-    suspend fun performFilter(){
-        searchResults.clear()
-        withContext(Dispatchers.Default) { listForPagination = Utils.getFullFilteredInventory(farePosition, durationPosition, searchResultsCopy) }
+    private fun setUpDialogCustomize(dialogCustomize: Dialog) {
+
+        val etStartFare = dialogCustomize.findViewById<View>(R.id.etStartFareRange) as EditText
+        val etEndFare = dialogCustomize.findViewById<View>(R.id.etEndFareRange)  as EditText
+        val etStartDuration = dialogCustomize.findViewById<View>(R.id.etStartDurationRange) as EditText
+        val etEndDuration = dialogCustomize.findViewById<View>(R.id.etEndDurationRange) as EditText
+        val btnApply = dialogCustomize.findViewById<View>(R.id.btnSubmit) as Button
+
+        btnApply.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.button_click_shrink))
+            when {
+                etStartFare.text.toString().isEmpty() -> etStartFare.error = "Start fare cannot be empty"
+                etEndFare.text.toString().isEmpty() -> etEndFare.error = "End fare cannot be empty"
+                etStartDuration.text.toString().isEmpty() -> etStartDuration.error = "Start hour cannot be empty"
+                etEndDuration.text.toString().isEmpty() -> etEndDuration.error = "End hour cannot be empty"
+                else -> {
+                    dialogCustomize.dismiss()
+                    val startFare = etStartFare.text.toString().toInt()
+                    val endFare = etEndFare.text.toString().toInt()
+                    val startDuration = etStartDuration.text.toString().toLong()
+                    val endDuration = etEndDuration.text.toString().toLong()
+
+                   launch {  performCustomFilter(startFare, endFare,
+                       startDuration * 60 , endDuration * 60) }
+                }
+            }
+        }
+    }
+
+    suspend fun performCustomFilter(startFare : Int , endFare : Int , startDuration : Long, endDuration : Long) { // For custom filtering
+        showProgressBar(progressBar)
+
+        withContext(Dispatchers.Default) { listForPagination = Utils.filterAction(startFare,
+            endFare, startDuration, endDuration, searchResultsCopy) } // asynchronous sorting
+
         paginateAndNotifyAdapter()
-        hideProgressBar()
+        hideProgressBar(progressBar)
+    }
+
+    suspend fun performNormalFilter(){     // For filtering using check box
+
+        withContext(Dispatchers.Default) { listForPagination = Utils.performFilter(farePosition,
+            durationPosition, searchResultsCopy) } // asynchronous sorting
+
+        paginateAndNotifyAdapter()
+        hideProgressBar(progressBar)
     }
 
     override fun onBackPressed() {
@@ -220,14 +273,6 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         else{
             super.onBackPressed()
         }
-    }
-
-    private fun hideProgressBar() {
-        Handler().postDelayed(Runnable { progressBar.visibility = View.GONE }, 500)
-    }
-
-    private fun showProgressBar() {
-        progressBar.visibility = View.VISIBLE
     }
 
     private fun showSnackbar() {

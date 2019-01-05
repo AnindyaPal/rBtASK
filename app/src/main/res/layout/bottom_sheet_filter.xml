@@ -5,13 +5,32 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="400dp"
-        android:background="@drawable/bottom_dialog"
         app:behavior_hideable="true"
         app:behavior_peekHeight="0dp"
         android:id="@+id/bottomDialogFilter"
         android:paddingTop="8dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
+    <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@mipmap/customize"
+            android:id="@+id/vCustomize"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:padding="8dp"
+    />
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/vCustomize"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bottom_dialog"
+    >
     <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -103,4 +122,5 @@
             app:layout_constraintBottom_toTopOf="@+id/btnApplyFilter"
             tools:listitem="@layout/item_filter"
     />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
