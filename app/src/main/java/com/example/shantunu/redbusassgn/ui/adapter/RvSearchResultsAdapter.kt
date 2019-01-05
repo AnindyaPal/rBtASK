@@ -1,7 +1,6 @@
 package com.example.shantunu.redbusassgn.ui.adapter
 
 import android.content.Context
-import android.opengl.Visibility
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StrikethroughSpan
@@ -17,7 +16,6 @@ import com.example.shantunu.redbusassgn.ui.viewHolders.EachBusHolder
 import com.example.shantunu.redbusassgn.ui.viewHolders.FooterViewHolder
 import com.example.shantunu.redbusassgn.ui.viewHolders.HeaderViewHolder
 
-
 class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Context,
                               private val types : LinkedHashMap<String, String>, private val travels : LinkedHashMap<String, String>)
     : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -26,15 +24,20 @@ class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Co
     private val TYPE_ITEM = 1
     private val TYPE_HEADER = 2
     var maxSize = 0
+
     override fun getItemCount(): Int {
-        return data.size + 1
+        if (data.size > 0){
+            return data.size + 2
+        } else {
+            return 0
+        }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
 
         if (holder is FooterViewHolder){
             if (data.size > 0) {
-                maxSize = data[position - 1].maxSize!!
+                maxSize = data[position - 2].maxSize!!
                 if (position == (maxSize + 2)) {           // for header and footer + 2 is done
                     holder.itemView.visibility = View.GONE
                 } else {
@@ -72,14 +75,14 @@ class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Co
 
             holder.tvSeatsLeft.text = seatsLeft
 
-            var netFare : Int ?= data[position - 1].seats?.baseFare?.minus(data[position].seats?.discount!!)
+            var netFare : Int ?= data[position - 1].seats?.baseFare?.minus(data[position - 1].seats?.discount!!)
             var strFare : String ? = context.getString(R.string.rs)+ " "+netFare.toString()
 
             holder.tvTotalAmt.text = strFare
 
             holder.tvArrivalTime.text = data[position - 1].reachesLocationIn?.let { Utils.getReachesLocationIn(it) }
 
-            holder.tvEndTime.text = data[position - 1].duration?.let { data[position].startTime?.let { it1 ->
+            holder.tvEndTime.text = data[position - 1].duration?.let { data[position - 1].startTime?.let { it1 ->
                 Utils.getEndTime(it,
                     it1
                 )
@@ -89,26 +92,22 @@ class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Co
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        when (viewType) {
-            TYPE_FOOTER -> {
-                val layoutView = LayoutInflater.from(parent.context).inflate(R.layout.progress_bar, parent, false)
-                return FooterViewHolder(layoutView)
-            }
-            TYPE_ITEM -> {
-                val layoutView = LayoutInflater.from(parent.context).inflate(R.layout.item_search_results, parent, false)
-                return EachBusHolder(layoutView)
-            }
-            TYPE_HEADER -> {
-                val layoutView = LayoutInflater.from(parent.context).inflate(R.layout.header_layout, parent, false)
-                return HeaderViewHolder(layoutView)
-            }
-            else -> throw RuntimeException("No match for $viewType.")
+        if (viewType == TYPE_FOOTER) {
+            val layoutView = LayoutInflater.from(parent.context).inflate(R.layout.progress_bar, parent, false)
+            return FooterViewHolder(layoutView)
+        }
+        else if (viewType == TYPE_ITEM) {
+            val layoutView = LayoutInflater.from(parent.context).inflate(R.layout.item_search_results, parent, false)
+            return EachBusHolder(layoutView)
+        } else {
+            val layoutView = LayoutInflater.from(parent.context).inflate(R.layout.header_layout, parent, false)
+            return HeaderViewHolder(layoutView)
         }
     }
 
     override fun getItemViewType(position: Int): Int {
         return when (position) {
-            data.size -> TYPE_FOOTER
+            data.size + 1 -> TYPE_FOOTER
             0 -> TYPE_HEADER
             else -> TYPE_ITEM
         }
