@@ -39,4 +39,5 @@ class GetAllResultsViewModel : ViewModel(), CoroutineScope {
         super.onCleared()
         job.cancel()
     }
+
 }

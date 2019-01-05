@@ -1,5 +1,7 @@
 package com.example.shantunu.redbusassgn
 
+import android.content.Context
+import android.net.ConnectivityManager
 import com.example.shantunu.redbusassgn.apiModels.EachRange
 import com.example.shantunu.redbusassgn.apiModels.Inventory
 import java.text.SimpleDateFormat
@@ -17,10 +19,10 @@ class Utils {
         fun getReachesLocationIn(minutes: Long): String {
             val mins = minutes / 60
             val secs = minutes % 60
-            if (minutes >= 60) {
-                return mins.toString() + " mins " + secs + " secs"
+            return if (minutes >= 60) {
+                mins.toString() + " mins " + secs + " secs"
             } else {
-                return secs.toString() + " seconds"
+                secs.toString() + " seconds"
             }
         }
 
@@ -203,5 +205,10 @@ class Utils {
             return inventory
         }
 
+        fun isNetworkAvailable(context: Context): Boolean {
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            val activeNetworkInfo = connectivityManager.activeNetworkInfo
+            return activeNetworkInfo != null && activeNetworkInfo.isConnected
+        }
     }
 }

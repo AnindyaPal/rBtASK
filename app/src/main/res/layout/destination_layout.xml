@@ -4,8 +4,10 @@
         xmlns:tools="http://schemas.android.com/tools" android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorWhite">
-
+        android:id="@+id/vRoot"
+        android:visibility="visible"
+        android:background="@color/colorWhite"
+>
     <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -43,4 +45,5 @@
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginEnd="8dp" android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
