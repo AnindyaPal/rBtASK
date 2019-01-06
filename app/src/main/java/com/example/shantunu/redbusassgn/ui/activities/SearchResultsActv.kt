@@ -65,6 +65,7 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
     var isSortByDuration : Boolean = false
 
     var tooltipShown = 0
+    var tooltipForBottomSheet = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,15 +169,18 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         when(item?.itemId){
             R.id.filter -> {
                 initBottomSheetFilter()
-                val view = findViewById<View>(R.id.filter)
-                if (!isDisplayedOnce(tooltipShown))
-                    showToolTip(view, "Tap to filter", Tooltip.Gravity.BOTTOM, this)
+
+                val filterView = findViewById<View>(R.id.filter)
+                val sortView = findViewById<View>(R.id.sort)
+
+                if (!isDisplayedOnce(tooltipShown)) {
+                    showToolTip(filterView, "Tap to filter", Tooltip.Gravity.BOTTOM, this)
+                    showToolTip(sortView, "Tap to sort", Tooltip.Gravity.BOTTOM, this)
+                    tooltipShown += 1
+                }
             }
             R.id.sort -> {
                 showSortDialog()
-                val view = findViewById<View>(R.id.sort)
-                if (!isDisplayedOnce(tooltipShown))
-                    showToolTip(view, "Tap to sort", Tooltip.Gravity.BOTTOM, this)
             }
             android.R.id.home -> {
                 onBackPressed()
@@ -265,12 +269,16 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         filterSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
         filterSheetBehavior.setBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(@NonNull bottomSheet: View, newState: Int) {
+
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     bg.visibility = View.GONE
-                } else if (newState == BottomSheetBehavior.STATE_EXPANDED){
+                }
+                else if (newState == BottomSheetBehavior.STATE_EXPANDED){
 
-                    if (!isDisplayedOnce(tooltipShown))
+                    if (!isDisplayedOnce(tooltipForBottomSheet))
                         showToolTip(vCustomize, "Customize filter options", Tooltip.Gravity.LEFT,this@SearchResultsActv)
+
+                    tooltipForBottomSheet += 1
 
                     vCustomize.startAnimation(AnimationUtils.loadAnimation(vCustomize.context, R.anim.rotation_anim))
                 }
