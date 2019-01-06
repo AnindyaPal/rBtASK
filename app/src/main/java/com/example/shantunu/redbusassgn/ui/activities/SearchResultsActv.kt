@@ -11,6 +11,7 @@ import android.view.animation.AnimationUtils
 import android.view.animation.DecelerateInterpolator
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Switch
 import androidx.annotation.NonNull
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -21,7 +22,9 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.shantunu.redbusassgn.R
 import com.example.shantunu.redbusassgn.Utils
+import com.example.shantunu.redbusassgn.Utils.Companion.getDialog
 import com.example.shantunu.redbusassgn.Utils.Companion.hideProgressBar
+import com.example.shantunu.redbusassgn.Utils.Companion.isDisplayedOnce
 import com.example.shantunu.redbusassgn.Utils.Companion.showProgressBar
 import com.example.shantunu.redbusassgn.Utils.Companion.showToolTip
 import com.example.shantunu.redbusassgn.apiModels.Inventory
@@ -36,6 +39,7 @@ import it.sephiroth.android.library.xtooltip.Tooltip
 import kotlinx.android.synthetic.main.activity_search_results_actv.*
 import kotlinx.android.synthetic.main.bottom_sheet_filter.*
 import kotlinx.coroutines.*
+import java.util.*
 import kotlin.coroutines.CoroutineContext
 
 class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
@@ -56,6 +60,11 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
 
     var farePosition : Int = 0
     var durationPosition : Int = 0
+
+    var isSortByFare : Boolean = false
+    var isSortByDuration : Boolean = false
+
+    var tooltipShown = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,10 +89,10 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
                 hideProgressBar(progressBar)
 
                 searchResultsCopy.clear()
-                searchResultsCopy.addAll(fullModel.inventory)
+                searchResultsCopy.addAll(Utils.getInventoryListWithNetFare(fullModel.inventory))
 
                 listForPagination.clear()
-                listForPagination.addAll(fullModel.inventory)
+                listForPagination.addAll(Utils.getInventoryListWithNetFare(fullModel.inventory))
 
                 types.clear()
                 types.putAll(fullModel.busType)
@@ -129,7 +138,6 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
 
     private fun paginateAndNotifyAdapter() {
 
-        searchResults.clear()
         var counter = 0
         for (i in searchResults.size until listForPagination.size) {
             if (counter <=9 ){
@@ -146,7 +154,8 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
             vEmptyView.visibility = View.GONE
             searchResults[searchResults.size - 1].maxSize = listForPagination.size - 1
         }
-        rvDataAdapter?.notifyDataSetChanged()
+
+        Handler().postDelayed( { rvDataAdapter?.notifyDataSetChanged() }, 300 )
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -158,9 +167,16 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item?.itemId){
             R.id.filter -> {
-                val view = findViewById<View>(R.id.filter)
                 initBottomSheetFilter()
-                showToolTip(view, "Tap to filter", Tooltip.Gravity.BOTTOM, this)
+                val view = findViewById<View>(R.id.filter)
+                if (!isDisplayedOnce(tooltipShown))
+                    showToolTip(view, "Tap to filter", Tooltip.Gravity.BOTTOM, this)
+            }
+            R.id.sort -> {
+                showSortDialog()
+                val view = findViewById<View>(R.id.sort)
+                if (!isDisplayedOnce(tooltipShown))
+                    showToolTip(view, "Tap to sort", Tooltip.Gravity.BOTTOM, this)
             }
             android.R.id.home -> {
                 onBackPressed()
@@ -172,6 +188,52 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
     override fun onDestroy() {
         super.onDestroy()
         job.cancel()
+    }
+
+    private fun showSortDialog() {
+        val dialogSort = getDialog(this, R.layout.sort_layout)
+        val swFare = dialogSort.findViewById<View>(R.id.swFare) as Switch
+        val swDuration = dialogSort.findViewById<View>(R.id.swDuration)as Switch
+        val btnApplySort = dialogSort.findViewById<View>(R.id.btnSort)
+
+        swFare.isChecked = isSortByFare
+        swDuration.isChecked = isSortByDuration
+
+        swFare.setOnCheckedChangeListener { _, b ->
+            if (b) {
+                isSortByFare = true
+                swDuration.isChecked = false
+            } else {
+                isSortByFare = false
+            }
+
+        }
+        swDuration.setOnCheckedChangeListener { _, b ->
+            if (b) {
+                isSortByDuration = true
+                swFare.isChecked = false
+            } else {
+                isSortByDuration = false
+            }
+        }
+
+        btnApplySort.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(it.context, R.anim.button_click_shrink))
+            dialogSort.dismiss()
+            performSort()
+            searchResults.clear()
+            paginateAndNotifyAdapter()
+        }
+
+        dialogSort.show()
+    }
+
+    private fun performSort() {
+        if (isSortByFare){
+            listForPagination.sortWith(Comparator { o1, o2 -> o1.netFare?.compareTo(o2.netFare!!)!! })
+        } else if (isSortByDuration){
+            listForPagination.sortWith(kotlin.Comparator { o1, o2 -> o2.duration?.let { o1.duration?.compareTo(it) }!! })
+        }
     }
 
     private fun initBottomSheetFilter() {
@@ -206,7 +268,10 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
                 if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
                     bg.visibility = View.GONE
                 } else if (newState == BottomSheetBehavior.STATE_EXPANDED){
-                    showToolTip(vCustomize, "Customize filter options", Tooltip.Gravity.LEFT,this@SearchResultsActv)
+
+                    if (!isDisplayedOnce(tooltipShown))
+                        showToolTip(vCustomize, "Customize filter options", Tooltip.Gravity.LEFT,this@SearchResultsActv)
+
                     vCustomize.startAnimation(AnimationUtils.loadAnimation(vCustomize.context, R.anim.rotation_anim))
                 }
             }
@@ -252,6 +317,9 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         withContext(Dispatchers.Default) { listForPagination = Utils.filterAction(startFare,
             endFare, startDuration, endDuration, searchResultsCopy) } // asynchronous sorting
 
+        searchResults.clear() // clear the showing list data
+
+        performSort()
         paginateAndNotifyAdapter()
         hideProgressBar(progressBar)
     }
@@ -261,6 +329,9 @@ class SearchResultsActv : AppCompatActivity(), CoroutineScope , LifecycleOwner {
         withContext(Dispatchers.Default) { listForPagination = Utils.performFilter(farePosition,
             durationPosition, searchResultsCopy) } // asynchronous sorting
 
+        searchResults.clear() // clear the current shown data
+
+        performSort()
         paginateAndNotifyAdapter()
         hideProgressBar(progressBar)
     }

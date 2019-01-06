@@ -156,7 +156,7 @@ class Utils {
 
             val inventories : MutableList<Inventory> = mutableListOf()
             for (inventory in searchResultsCopy) {
-                if (inventory.seats?.baseFare in startFare..endFare && inventory.duration in startDuration..endDuration)
+                if (inventory.netFare in startFare..endFare && inventory.duration in startDuration..endDuration)
                     inventories.add(inventory)
             }
             return inventories
@@ -205,6 +205,17 @@ class Utils {
             tooltip
                 .doOnFailure {  }
                 .show(view, gravity, true)
+        }
+
+        fun getInventoryListWithNetFare(inventoryList : MutableList<Inventory>) : MutableList<Inventory> {
+            for (inventory in inventoryList) {
+                inventory.netFare = inventory.seats?.baseFare?.minus(inventory.seats?.discount!!)
+            }
+            return inventoryList
+        }
+
+        fun isDisplayedOnce(tooltipShown : Int): Boolean {
+            return tooltipShown > 0
         }
     }
 }

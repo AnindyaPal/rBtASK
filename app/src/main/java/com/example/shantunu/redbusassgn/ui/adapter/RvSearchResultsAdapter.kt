@@ -39,12 +39,12 @@ class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Co
             if (data.size > 0) {
                 maxSize = data[position - 2].maxSize!!
                 if (position == (maxSize + 2)) {           // for header and footer + 2 is done
-                    holder.itemView.visibility = View.GONE
+                    holder.progressBB.visibility = View.GONE
                 } else {
-                    holder.itemView.visibility = View.VISIBLE
+                    holder.progressBB.visibility = View.VISIBLE
                 }
             } else{
-                holder.itemView.visibility = View.GONE
+                holder.progressBB.visibility = View.GONE
             }
         }
         else if (holder is EachBusHolder) {
@@ -54,30 +54,27 @@ class RvSearchResultsAdapter (val data: MutableList<Inventory>, val context : Co
             holder.tvBusCompany.text = travels[data[position - 1].bus?.travelsName?.toString()]
             holder.tvRating.text = data[position - 1].rating.toString()
 
-            data[position - 1].rating?.let { if (it > 4) {
-                holder.tvRating.background = ResourcesCompat.getDrawable(context.resources, R.drawable.rectangle_rating, null)
-            }else {
-                holder.tvRating.background = ResourcesCompat.getDrawable(context.resources, R.drawable.rectangle_below_five, null) }
+            data[position - 1].rating?.let {
+                when {
+                    it >= 4 -> holder.tvRating.background = ResourcesCompat.getDrawable(context.resources, R.drawable.rectangle_rating, null)
+                    it >= 3 -> holder.tvRating.background = ResourcesCompat.getDrawable(context.resources, R.drawable.rectangle_below_four, null)
+                    else -> holder.tvRating.background = ResourcesCompat.getDrawable(context.resources, R.drawable.rectangle_below_three, null)
+                }
             }
 
-            data[position - 1].seats?.discount?.let {
-                val strRedDeal = "Red Deal "
-                val onlyBaseFare : String = context.getString(R.string.rs)+ " "+data[position - 1].seats?.baseFare.toString()
-                val strBaseFare : String = strRedDeal+onlyBaseFare
-                val spannable = SpannableString(strBaseFare)
-                spannable.setSpan(StrikethroughSpan(), strRedDeal.length, strBaseFare.length     , Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                holder.tvRedBusDeal.text = spannable
-            }
+            val strRedDeal = "Red Deal "
+            val onlyBaseFare : String = context.getString(R.string.rs)+ " "+data[position - 1].seats?.baseFare.toString()
+            val strBaseFare : String = strRedDeal+onlyBaseFare
+            val spannable = SpannableString(strBaseFare)
+            spannable.setSpan(StrikethroughSpan(), strRedDeal.length, strBaseFare.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            holder.tvRedBusDeal.text = spannable
 
             holder.tvNoRating.text = data[position - 1].nosRating.toString()+ " ratings"
 
             val seatsLeft : String = data[position - 1].seats?.seatsRemaining.toString() + " seats left"
-
             holder.tvSeatsLeft.text = seatsLeft
 
-            var netFare : Int ?= data[position - 1].seats?.baseFare?.minus(data[position - 1].seats?.discount!!)
-            var strFare : String ? = context.getString(R.string.rs)+ " "+netFare.toString()
-
+            var strFare : String ? = context.getString(R.string.rs)+ " "+ data[position - 1].netFare?.toString()
             holder.tvTotalAmt.text = strFare
 
             holder.tvArrivalTime.text = data[position - 1].reachesLocationIn?.let { Utils.getReachesLocationIn(it) }
